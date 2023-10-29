@@ -445,7 +445,7 @@ async fn main() {
     let args = clap::App::new("Atto work server")
         .version("1.0")
         .author("Lee Bousfield <ljbousfield@gmail.com>")
-        .about("Provides a work server for Atto without a full node.")
+        .about("Provides a work server for Atto.")
         .arg(
             clap::Arg::with_name("listen_address")
                 .short("l")

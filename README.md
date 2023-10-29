@@ -1,4 +1,4 @@
-# Work server
+# Atto work server
 
 ![Build](https://github.com/attocash/work-server/workflows/Build/badge.svg)
 
