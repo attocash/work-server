@@ -67,16 +67,16 @@ impl Gpu {
             .len(32)
             .build()?;
 
-        let difficulty = 0u64;
+        let threshold = 0u64;
 
         let kernel = {
-            let mut kernel_builder = pro_que.kernel_builder("nano_work");
+            let mut kernel_builder = pro_que.kernel_builder("work");
             kernel_builder
                 .global_work_size(threads)
                 .arg(&attempt)
                 .arg(&result)
                 .arg(&root)
-                .arg_named("difficulty", &difficulty);
+                .arg_named("threshold", &threshold);
             if let Some(local_work_size) = local_work_size {
                 kernel_builder.local_work_size(local_work_size);
             }
@@ -98,10 +98,10 @@ impl Gpu {
         Ok(())
     }
 
-    pub fn set_task(&mut self, root: &[u8], difficulty: u64) -> Result<()> {
+    pub fn set_task(&mut self, root: &[u8], threshold: u64) -> Result<()> {
         self.reset_bufs()?;
         self.root.write(root).enq()?;
-        self.kernel.set_arg("difficulty", difficulty)?;
+        self.kernel.set_arg("threshold", threshold)?;
         Ok(())
     }
 

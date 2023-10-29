@@ -96,9 +96,9 @@ static inline ulong blake2b(ulong const nonce, __constant ulong *h)
 __kernel void nano_work(__constant uchar *attempt,
                         __global uchar *result_a,
                         __constant uchar *item_a,
-                        const ulong difficulty)
+                        const ulong threshold)
 {
     const ulong attempt_l = *((__constant ulong *) attempt) + get_global_id(0);
-    if (blake2b(attempt_l, item_a) >= difficulty)
+    if (blake2b(attempt_l, item_a) <= threshold)
         *((__global ulong *) result_a) = attempt_l;
 }

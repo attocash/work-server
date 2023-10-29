@@ -1,19 +1,14 @@
-# Nano work server
+# Work server
 
-![Build](https://github.com/nanocurrency/nano-work-server/workflows/Build/badge.svg)
+![Build](https://github.com/attocash/work-server/workflows/Build/badge.svg)
 
-This project is a dedicated work server for [the Nano cryptocurrency](https://nano.org/). See the [documentation](https://docs.nano.org/integration-guides/work-generation/) for details on work generation and the current network difficulty.
+This project is a dedicated work server for the [Atto cryptocurrency](https://github.com/attocash). See the [documentation](https://github.com/attocash/) for details on work generation.
 
-**nano-work-server** supports the `work_generate`, `work_cancel`, and `work_validate` commands from the Nano RPC.
-For details on these commands, see [the Nano RPC documentation](https://docs.nano.org/commands/rpc-protocol/).
+**work-server** supports the `work_generate`, `work_cancel`, and `work_validate` commands.
 
-To see available command line options, run `nano-work-server --help`.
+To see available command line options, run `work-server --help`.
 
 If using more than one work peer, give the flag `--shuffle`. This makes it so that the next request is picked randomly instead of sequentially, which leads to more efficient work generation with multiple peers, especially when they are not in the same network.
-
-## Current base difficulty
-
-`0xfffffff800000000` since [a75d984](https://github.com/nanocurrency/nano-work-server/commit/a75d98429a11fcb0c129a55380996a612299917b). See the [Nano work generation guide](https://docs.nano.org/integration-guides/work-generation/#difficulty-thresholds) for more information.
 
 ## Installation
 
@@ -62,8 +57,8 @@ sudo dnf install gcc
 ### Build
 
 ```bash
-git clone https://github.com/nanocurrency/nano-work-server.git
-cd nano-work-server
+git clone https://github.com/attocash/work-server.git
+cd work-server
 cargo build --release
 ```
 
@@ -75,9 +70,9 @@ cargo rustc --release -- -l OpenCL -L "/path/to/opencl.lib"
 
 ## Using
 
-`nano-work-server --help`
+`work-server --help`
 
-_Note_ difficulty values may be outdated in these examples.
+_Note_ threshold values may be outdated in these examples.
 
 - `work_generate` example:
 
@@ -85,8 +80,7 @@ _Note_ difficulty values may be outdated in these examples.
     {
         "action": "work_generate",
         "hash": "718CC2121C3E641059BC1C2CFC45666C99E8AE922F7A807B7D07B62C995D79E2",
-        "difficulty": "ffffffc000000000",
-        "multiplier": "1.0" // overrides difficulty
+        "threshold": "34359738367"
     }
     ```
     Response:
@@ -94,8 +88,7 @@ _Note_ difficulty values may be outdated in these examples.
     ```json
     {
         "work": "2bf29ef00786a6bc",
-        "difficulty": "ffffffd21c3933f4",
-        "multiplier": "1.3946469"        
+        "threshold": "34359738367"     
     }
     ```
 
@@ -107,18 +100,15 @@ _Note_ difficulty values may be outdated in these examples.
         "action": "work_validate",
         "hash": "718CC2121C3E641059BC1C2CFC45666C99E8AE922F7A807B7D07B62C995D79E2",
         "work": "2bf29ef00786a6bc",
-        "difficulty": "ffffffc000000000",
-        "multiplier": "1.0" // overrides difficulty
+        "threshold": "34359738367"
     }
     ```
     Response:
 
     ```json
     {
-        "valid_all": "1",
-        "valid_receive": "1",
-        "difficulty": "ffffffd21c3933f4",
-        "multiplier": "1.3946469"
+        "valid": "1",
+        "threshold": "34359738367"
     }
     ```
 
@@ -143,6 +133,7 @@ Example request:
 ```json
 {
     "action": "benchmark",
+    "threshold": "34359738367",
     "count": "10"
 }
 ```
@@ -155,7 +146,7 @@ Example response:
 {
     "average": "481",
     "count": "10",
-    "difficulty": "fffffff800000000",
+    "threshold": "34359738367",
     "duration": "4813",
     "hint": "Times in milliseconds",
     "multiplier": "1"

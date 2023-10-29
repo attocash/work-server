@@ -33,9 +33,6 @@ use chrono::{DateTime, Utc};
 
 use gpu::Gpu;
 
-const LIVE_DIFFICULTY: u64 = 0xfffffff800000000;
-const LIVE_RECEIVE_DIFFICULTY: u64 = 0xfffffe0000000000;
-
 fn work_value(root: [u8; 32], work: [u8; 8]) -> u64 {
     let mut buf = [0u8; 8];
     let mut hasher = Blake2bVar::new(buf.len()).expect("Unsupported hash length");
@@ -46,9 +43,9 @@ fn work_value(root: [u8; 32], work: [u8; 8]) -> u64 {
 }
 
 #[inline]
-fn work_valid(root: [u8; 32], work: [u8; 8], difficulty: u64) -> (bool, u64) {
-    let result_difficulty = work_value(root, work);
-    (result_difficulty >= difficulty, result_difficulty)
+fn work_valid(root: [u8; 32], work: [u8; 8], threshold: u64) -> (bool, u64) {
+    let result_threshold = work_value(root, work);
+    (result_threshold <= threshold, result_threshold)
 }
 
 enum WorkError {
@@ -59,7 +56,7 @@ enum WorkError {
 #[derive(Default)]
 struct WorkState {
     root: [u8; 32],
-    difficulty: u64,
+    threshold: u64,
     callback: Option<oneshot::Sender<Result<[u8; 8], WorkError>>>,
     task_complete: Arc<AtomicBool>,
     unsuccessful_workers: usize,
@@ -78,9 +75,9 @@ impl WorkState {
                     1
                 };
                 let i = rand::thread_rng().gen_range(0..max_range);
-                let (root, difficulty, callback) = self.future_work.remove(i);
+                let (root, threshold, callback) = self.future_work.remove(i);
                 self.root = root;
-                self.difficulty = difficulty;
+                self.threshold = threshold;
                 self.callback = Some(callback);
                 self.task_complete = Arc::new(AtomicBool::new(false));
                 cond_var.notify_all();
@@ -95,10 +92,10 @@ struct RpcService {
 }
 
 enum RpcCommand {
-    WorkGenerate([u8; 32], Option<u64>, Option<f64>),
+    WorkGenerate([u8; 32], u64),
     WorkCancel([u8; 32]),
-    WorkValidate([u8; 32], [u8; 8], Option<u64>, Option<f64>),
-    Benchmark(Option<u64>, Option<f64>, u64),
+    WorkValidate([u8; 32], [u8; 8], u64),
+    Benchmark(u64, u64),
     Status(),
 }
 
@@ -113,11 +110,11 @@ impl RpcService {
     fn generate_work(
         &self,
         root: [u8; 32],
-        difficulty: u64,
-    ) -> impl Future<Output = Result<[u8; 8], WorkError>> {
+        threshold: u64,
+    ) -> impl Future<Output=Result<[u8; 8], WorkError>> {
         let mut state = self.work_state.0.lock();
         let (callback_send, callback_recv) = oneshot::channel();
-        state.future_work.push((root, difficulty, callback_send));
+        state.future_work.push((root, threshold, callback_send));
         state.set_task(&self.work_state.1);
         callback_recv
             .map_err(|_| WorkError::Errored)
@@ -141,14 +138,6 @@ impl RpcService {
                 state.set_task(&self.work_state.1);
             }
         }
-    }
-
-    fn to_multiplier(&self, difficulty: u64) -> f64 {
-        (LIVE_DIFFICULTY.wrapping_neg() as f64) / (difficulty.wrapping_neg() as f64)
-    }
-
-    fn from_multiplier(&self, multiplier: f64) -> u64 {
-        (((LIVE_DIFFICULTY.wrapping_neg() as f64) / multiplier) as u64).wrapping_neg()
     }
 
     fn parse_hex_json(
@@ -221,47 +210,26 @@ impl RpcService {
                 "hint": "Work is too long (should be 8 bytes)",
             }),
         })?;
-        out.reverse();
         Ok(out)
     }
 
-    fn parse_difficulty_json(json: &Value) -> Result<Option<u64>, Value> {
-        match json.get("difficulty") {
-            None => Ok(None),
+    fn parse_threshold_json(json: &Value) -> Result<u64, Value> {
+        let threshold_value = json.get("threshold").ok_or(json!({
+            "error": "Failed to deserialize JSON",
+            "hint": "Missing 'threshold' field",
+        }))?;
+        let threshold_str = threshold_value.as_str().ok_or(json!({
+            "error": "Failed to deserialize JSON",
+            "hint": "Expecting a decimal string for threshold",
+        }))?;
+        let threshold = threshold_str.parse::<u64>().map_err(|_| json!({
+            "error": "Failed to deserialize JSON",
+            "hint": "Threshold not a valid unsigned long (u64). Example: '18446744039349813248'",
+        }))?;
 
-            Some(json) => {
-                let difficulty_str = json.as_str().ok_or(json!({
-                    "error": "Failed to deserialize JSON",
-                    "hint": "Expecting a hex string for difficulty",
-                }))?;
-
-                let difficulty = u64::from_str_radix(difficulty_str, 16).map_err(|_| json!({
-                    "error": "Failed to deserialize JSON",
-                    "hint": "Threshold not a valid unsigned long (u64). Example: 'ffffffc000000000'",
-                }))?;
-
-                Ok(Some(difficulty))
-            }
-        }
+        Ok(threshold)
     }
 
-    fn parse_multiplier_json(json: &Value) -> Result<Option<f64>, Value> {
-        match json.get("multiplier") {
-            None => Ok(None),
-
-            Some(json) => {
-                let multiplier = json
-                    .as_str()
-                    .and_then(|s| s.parse().ok())
-                    .filter(|&x| x > 0.)
-                    .ok_or(json!({
-                        "error": "Failed to deserialize JSON",
-                        "hint": "Expecting a positive number for multiplier"
-                    }))?;
-                Ok(Some(multiplier))
-            }
-        }
-    }
 
     fn parse_count_json(json: &Value) -> Result<u64, Value> {
         match json.get("count") {
@@ -293,12 +261,11 @@ impl RpcService {
                 return Err(json!({
                     "error": "Failed to deserialize JSON",
                     "hint": "Work field missing",
-                }))
+                }));
             }
             Some(action) if action == "work_generate" => Ok(RpcCommand::WorkGenerate(
                 Self::parse_hash_json(&json)?,
-                Self::parse_difficulty_json(&json)?,
-                Self::parse_multiplier_json(&json)?,
+                Self::parse_threshold_json(&json)?,
             )),
             Some(action) if action == "work_cancel" => {
                 Ok(RpcCommand::WorkCancel(Self::parse_hash_json(&json)?))
@@ -306,12 +273,10 @@ impl RpcService {
             Some(action) if action == "work_validate" => Ok(RpcCommand::WorkValidate(
                 Self::parse_hash_json(&json)?,
                 Self::parse_work_json(&json)?,
-                Self::parse_difficulty_json(&json)?,
-                Self::parse_multiplier_json(&json)?,
+                Self::parse_threshold_json(&json)?,
             )),
             Some(action) if action == "benchmark" => Ok(RpcCommand::Benchmark(
-                Self::parse_difficulty_json(&json)?,
-                Self::parse_multiplier_json(&json)?,
+                Self::parse_threshold_json(&json)?,
                 Self::parse_count_json(&json)?,
             )),
             Some(action) if action == "status" => Ok(RpcCommand::Status()),
@@ -319,7 +284,7 @@ impl RpcService {
                 return Err(json!({
                     "error": "Unknown command",
                     "hint": "Supported commands: work_generate, work_cancel, work_validate, benchmark, status"
-                }))
+                }));
             }
         }
     }
@@ -342,37 +307,29 @@ impl RpcService {
         };
         let start = Instant::now();
         match command {
-            RpcCommand::WorkGenerate(root, difficulty, multiplier) => {
+            RpcCommand::WorkGenerate(root, threshold) => {
                 let now: DateTime<Utc> = Utc::now();
                 let _ = println!(
                     "{} Received work for {}",
                     now.format("%T"),
                     hex::encode_upper(&root)
                 );
-                let difficulty = match multiplier {
-                    None => difficulty.unwrap_or(LIVE_DIFFICULTY),
-                    Some(multiplier) => self.from_multiplier(multiplier),
-                };
-                match self.generate_work(root, difficulty).await {
-                    Ok(mut work) => {
-                        let result_difficulty = work_value(root, work);
-                        let result_multiplier = self.to_multiplier(result_difficulty);
+                match self.generate_work(root, threshold).await {
+                    Ok(work) => {
+                        let result_threshold = work_value(root, work);
                         let now: DateTime<Utc> = Utc::now();
                         let _ = println!(
-                            "{} Generated for {} in {}ms for difficulty {:x}",
+                            "{} Generated for {} in {}ms for threshold {}",
                             now.format("%T"),
                             hex::encode_upper(&root),
                             start.elapsed().as_millis(),
-                            difficulty
+                            threshold
                         );
-                        // Reverse before encoding
-                        work.reverse();
                         Ok((
                             StatusCode::OK,
                             json!({
                                 "work": hex::encode(&work),
-                                "difficulty": format!("{:x}", result_difficulty),
-                                "multiplier": format!("{}", result_multiplier),
+                                "threshold": format!("{}", result_threshold),
                             }),
                         ))
                     }
@@ -395,38 +352,23 @@ impl RpcService {
                 self.cancel_work(root);
                 Ok((StatusCode::OK, json!({})))
             }
-            RpcCommand::WorkValidate(root, work, difficulty, multiplier) => {
+            RpcCommand::WorkValidate(root, work, threshold) => {
                 let _ = println!("Validate {}", hex::encode_upper(&root));
-                let difficulty_l = match multiplier {
-                    None => difficulty.unwrap_or(LIVE_DIFFICULTY),
-                    Some(multiplier) => self.from_multiplier(multiplier),
-                };
-                let (valid, result_difficulty) = work_valid(root, work, difficulty_l);
-                let (valid_all, _) = work_valid(root, work, LIVE_DIFFICULTY);
-                let (valid_receive, _) = work_valid(root, work, LIVE_RECEIVE_DIFFICULTY);
+                let (valid, result_threshold) = work_valid(root, work, threshold);
                 let mut result = json!({
-                    "valid_all": if valid_all { "1" } else { "0" },
-                    "valid_receive": if valid_receive { "1" } else { "0" },
-                    "difficulty": format!("{:x}", result_difficulty),
-                    "multiplier": format!("{}", self.to_multiplier(result_difficulty)),
+                    "valid": if valid { "1" } else { "0" },
+                    "threshold": format!("{}", result_threshold),
                 });
-                if difficulty.is_some() {
-                    result
-                        .as_object_mut()
-                        .unwrap()
-                        .insert(String::from("valid"), json!(if valid { "1" } else { "0" }));
-                }
+                result
+                    .as_object_mut()
+                    .unwrap()
+                    .insert(String::from("valid"), json!(if valid { "1" } else { "0" }));
                 Ok((StatusCode::OK, result))
             }
-            RpcCommand::Benchmark(difficulty, multiplier, count) => {
-                let difficulty_l = match multiplier {
-                    None => difficulty.unwrap_or(LIVE_DIFFICULTY),
-                    Some(multiplier) => self.from_multiplier(multiplier),
-                };
-                let multiplier_l = self.to_multiplier(difficulty_l);
+            RpcCommand::Benchmark(threshold, count) => {
                 let _ = println!(
-                    "Benchmarking {} samples at difficulty {:x} ({}x)",
-                    count, difficulty_l, multiplier_l,
+                    "Benchmarking {} samples at threshold {}",
+                    count, threshold,
                 );
                 let mut roots: Vec<[u8; 32]> = Vec::new();
                 roots.reserve(count as usize);
@@ -435,7 +377,7 @@ impl RpcService {
                 }
                 let start = Instant::now();
                 for root in roots {
-                    if self.generate_work(root, difficulty_l).await.is_err() {
+                    if self.generate_work(root, threshold).await.is_err() {
                         return Ok((StatusCode::INTERNAL_SERVER_ERROR, {
                             json!({
                                 "error": "Benchmark failed",
@@ -452,8 +394,7 @@ impl RpcService {
                 );
                 Ok((StatusCode::OK, {
                     json!({
-                        "difficulty": format!("{:x}", difficulty_l),
-                        "multiplier": format!("{}", multiplier_l),
+                        "threshold": format!("{}", threshold),
                         "count": format!("{}", count),
                         "duration": format!("{}", duration),
                         "average": format!("{}", average),
@@ -501,10 +442,10 @@ impl RpcService {
 
 #[tokio::main]
 async fn main() {
-    let args = clap::App::new("Nano work server")
+    let args = clap::App::new("Atto work server")
         .version("1.0")
         .author("Lee Bousfield <ljbousfield@gmail.com>")
-        .about("Provides a work server for Nano without a full node.")
+        .about("Provides a work server for Atto without a full node.")
         .arg(
             clap::Arg::with_name("listen_address")
                 .short("l")
@@ -603,7 +544,7 @@ async fn main() {
         let mut rng =
             XorShiftRng::from_rng(rand::thread_rng()).expect("Failed to create XorShiftRng");
         let mut root = [0u8; 32];
-        let mut difficulty = 0u64;
+        let mut threshold = 0u64;
         let mut task_complete = Arc::new(AtomicBool::new(true));
         let handle = thread::spawn(move || loop {
             if task_complete.load(atomic::Ordering::Relaxed) {
@@ -612,12 +553,12 @@ async fn main() {
                     work_state.1.wait(&mut state);
                 }
                 root = state.root;
-                difficulty = state.difficulty;
+                threshold = state.threshold;
                 task_complete = state.task_complete.clone();
             }
             let mut out: [u8; 8] = rng.gen();
             for _ in 0..(1 << 18) {
-                if work_valid(root, out, difficulty).0 {
+                if work_valid(root, out, threshold).0 {
                     let mut state = work_state.0.lock();
                     if root == state.root {
                         if let Some(callback) = state.callback.take() {
@@ -643,7 +584,7 @@ async fn main() {
         let mut rng =
             XorShiftRng::from_rng(rand::thread_rng()).expect("Failed to create XorShiftRng");
         let mut root = [0u8; 32];
-        let mut difficulty = 0u64;
+        let mut threshold = 0u64;
         let work_state = work_state.clone();
         let mut task_complete = Arc::new(AtomicBool::new(true));
         let mut consecutive_gpu_errors = 0;
@@ -668,12 +609,12 @@ async fn main() {
                     work_state.1.wait(&mut state);
                 }
                 root = state.root;
-                difficulty = state.difficulty;
+                threshold = state.threshold;
                 task_complete = state.task_complete.clone();
                 if failed {
                     state.unsuccessful_workers -= 1;
                 }
-                if let Err(err) = gpu.set_task(&root, difficulty) {
+                if let Err(err) = gpu.set_task(&root, threshold) {
                     eprintln!(
                         "Failed to set GPU {}'s task, abandoning it for this work: {:?}",
                         gpu_i, err,
@@ -688,7 +629,7 @@ async fn main() {
             let mut out = [0u8; 8];
             match gpu.run(&mut out, attempt) {
                 Ok(true) => {
-                    if work_valid(root, out, difficulty).0 {
+                    if work_valid(root, out, threshold).0 {
                         let mut state = work_state.0.lock();
                         if root == state.root {
                             if let Some(callback) = state.callback.take() {
@@ -752,10 +693,6 @@ async fn main() {
         }
     });
     let server = Server::bind(&listen_addr).serve(make_service);
-    println!(
-        "Configured for the live network with threshold {:x}",
-        LIVE_DIFFICULTY
-    );
     println!("Ready to receive requests on {}", listen_addr);
     server.await.expect("Failed to serve requests");
 }
