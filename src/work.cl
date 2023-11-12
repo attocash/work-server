@@ -93,7 +93,7 @@ static inline ulong blake2b(ulong const nonce, __constant ulong *h)
 #undef G2v_split
 #undef ROUND
 
-__kernel void nano_work(__constant uchar *attempt,
+__kernel void work(__constant uchar *attempt,
                         __global uchar *result_a,
                         __constant uchar *item_a,
                         const ulong threshold)

@@ -260,7 +260,7 @@ impl RpcService {
             None => {
                 return Err(json!({
                     "error": "Failed to deserialize JSON",
-                    "hint": "Work field missing",
+                    "hint": "Action field missing",
                 }));
             }
             Some(action) if action == "work_generate" => Ok(RpcCommand::WorkGenerate(
