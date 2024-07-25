@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: work-server
+  main:
+    banner-mode: off
+  threads:
+    virtual:
+      enabled: true
+  mvc:
+    format:
+      date: iso
+      time: iso
+      date-time: iso
+  jackson:
+    serialization:
+      write_dates_as_timestamps: false
+
+
+atto:
+  work:
+    queue-size: ${ATTO_WORK_QUEUE_SIZE:4}
+    device: ${ATTO_WORK_DEVICE:0}
+
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      base-path: '/'
