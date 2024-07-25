@@ -6,8 +6,6 @@ import cash.atto.commons.AttoHash
 import cash.atto.commons.AttoNetwork
 import cash.atto.commons.AttoOpenBlock
 import cash.atto.commons.AttoPublicKey
-import cash.atto.commons.AttoWorker
-import cash.atto.commons.opencl
 import cash.atto.commons.toAttoVersion
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
@@ -52,7 +50,6 @@ class WorkStepDefinition(
     fun request() {
         val shortKey = PropertyHolder.getActiveKey(AttoOpenBlock::class.java)!!
         val block = PropertyHolder.get(AttoOpenBlock::class.java, shortKey)
-        val work = AttoWorker.opencl().work(block)
 
         val request =
             WorkRequest(

@@ -5,7 +5,6 @@ import cash.atto.commons.cpu
 import io.netty.handler.logging.LogLevel
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
 import org.springframework.http.client.reactive.ClientHttpConnector
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.http.codec.ClientCodecConfigurer
@@ -17,7 +16,6 @@ import reactor.netty.transport.logging.AdvancedByteBufFormat
 @Configuration
 class TestApplicationConfiguration {
     @Bean
-    @Primary
     fun cpuWorker(): List<AttoWorker> {
         return listOf(AttoWorker.cpu())
     }
