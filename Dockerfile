@@ -1,9 +1,6 @@
-FROM alpine:latest
+FROM debian:latest
 
-RUN apk add --no-cache \
-    opencl-headers \
-    ocl-icd \
-    ocl-icd-dev
+RUN apt update && apt install ocl-icd-libopencl1 clinfo
 
 COPY ./build/native/nativeCompile/work-server /app/work-server
 
