@@ -30,8 +30,8 @@ configurations {
 }
 
 dependencies {
+    val commonsVersion = "2.14.0"
     val cucumberVersion = "7.18.0"
-    val commonsVersion = "2.14.0-SNAPSHOT"
 
     implementation("cash.atto:commons:$commonsVersion")
     implementation("cash.atto:commons:$commonsVersion") {

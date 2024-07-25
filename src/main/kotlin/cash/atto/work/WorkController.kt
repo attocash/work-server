@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class WorkController(
-    private val calculator: WorkCalculator,
+    private val calculator: Worker,
 ) {
     @PostMapping("/works", produces = [MediaType.APPLICATION_NDJSON_VALUE])
     @Operation(description = "Generate work")

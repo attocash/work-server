@@ -1,0 +1,31 @@
+name: Pipeline
+
+on:
+  workflow_call:
+  push:
+    branches:
+      - 'release/[0-9]+.x'
+      - main
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yaml
+  build:
+    permissions:
+      contents: read
+      packages: write
+    if: "startsWith(github.ref, 'refs/heads/')"
+    needs:
+      - test
+    uses: ./.github/workflows/build.yaml
+  release:
+    permissions:
+      contents: read
+      packages: write
+    if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
+    needs:
+      - build
+    uses: ./.github/workflows/release.yaml
+    with:
+      profile: main
+      bump-version: true
