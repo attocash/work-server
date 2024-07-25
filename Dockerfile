@@ -11,7 +11,7 @@ LABEL org.opencontainers.image.source https://github.com/attocash/work-server
 ENV JAVA_HOME=/java
 ENV PATH "${JAVA_HOME}/bin:${PATH}"
 
-RUN adduser --disabled-password --gecos "" atto
+RUN useradd -m -s /bin/bash atto
 USER atto
 
 RUN apt-get update && apt-get install -y ocl-icd-libopencl1
