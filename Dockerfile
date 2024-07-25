@@ -1,15 +1,21 @@
-FROM debian:latest
+FROM eclipse-temurin:21-alpine as jdk
 
-RUN apt update && apt install ocl-icd-libopencl1
+COPY ./build/libs/work-server.jar /work-server.jar
 
-COPY ./build/native/nativeCompile/work-server /app/work-server
+RUN jar -xvf work-server.jar && jlink --add-modules $(jdeps --recursive --multi-release 21 --ignore-missing-deps --print-module-deps -cp 'BOOT-INF/lib/*' work-server.jar) --output /java
 
-WORKDIR /app
+FROM alpine
 
-RUN groupadd -r app && useradd -r -g app app
-USER app
+LABEL org.opencontainers.image.source https://github.com/attocash/work-server
 
-EXPOSE 8080
-EXPOSE 8081
+ENV JAVA_HOME=/java
+ENV PATH "${JAVA_HOME}/bin:${PATH}"
 
-ENTRYPOINT ["./work-server"]
+RUN adduser -D atto
+USER atto
+
+COPY ./build/libs/work-server.jar /home/atto/work-server.jar
+
+COPY --from=jdk /java /java
+
+ENTRYPOINT ["java","-XX:+UseZGC","-jar","/home/atto/work-server.jar"]
