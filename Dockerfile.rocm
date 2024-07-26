@@ -3,25 +3,15 @@ FROM ghcr.io/attocash/work-server:${BASE_IMAGE_TAG}
 
 USER root
 
-RUN df -h && \
-    apt-get update && \
-    apt-get install -y gnupg wget && \
-    apt-get remove -y '^ghc-8.*' && \
-    apt-get remove -y '^dotnet-.*' \
-    apt-get remove -y '^llvm-.*' \
-    apt-get remove -y 'php.*' \
-    apt-get remove -y azure-cli google-cloud-sdk hhvm google-chrome-stable firefox powershell mono-devel \
-    apt-get autoremove -y \
+RUN apt-get update && apt-get install -y gnupg wget && \
     wget https://repo.radeon.com/amdgpu-install/6.1.2/ubuntu/jammy/amdgpu-install_6.1.60102-1_all.deb && \
     apt install -y ./amdgpu-install_6.1.60102-1_all.deb && \
     amdgpu-install -y --usecase=rocm,dkms && \
+    rm amdgpu-*.deb && \
     apt-get remove -y gnupg wget && \
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    df -h && \
-    rm -rf /usr/share/dotnet/ && \
-    df -h
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 USER atto
 
