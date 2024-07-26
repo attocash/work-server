@@ -1,5 +1,5 @@
 ARG BASE_IMAGE_TAG=latest
-FROM work-server:${BASE_IMAGE_TAG}
+FROM ghcr.io/attocash/work-server:${BASE_IMAGE_TAG}
 
 USER root
 
