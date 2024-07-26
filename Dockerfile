@@ -4,7 +4,7 @@ COPY ./build/libs/work-server.jar /work-server.jar
 
 RUN jar -xvf work-server.jar && jlink --add-modules $(jdeps --recursive --multi-release 21 --ignore-missing-deps --print-module-deps -cp 'BOOT-INF/lib/*' work-server.jar) --output /java
 
-FROM ubuntu
+FROM ubuntu:22.04
 
 LABEL org.opencontainers.image.source https://github.com/attocash/work-server
 
