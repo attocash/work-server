@@ -27,5 +27,5 @@ jobs:
       - build
     uses: ./.github/workflows/release.yaml
     with:
-      profile: main
+      profile: rocm
       bump-version: true

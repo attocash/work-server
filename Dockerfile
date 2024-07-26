@@ -14,8 +14,6 @@ ENV PATH "${JAVA_HOME}/bin:${PATH}"
 RUN useradd -m -s /bin/bash atto
 USER atto
 
-#RUN apt-get update && apt-get install -y ocl-icd-libopencl1
-
 COPY ./build/libs/work-server.jar /home/atto/work-server.jar
 
 COPY --from=jdk /java /java
