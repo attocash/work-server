@@ -20,7 +20,7 @@ jobs:
     uses: ./.github/workflows/build.yaml
   release:
     permissions:
-      contents: read
+      contents: write
       packages: write
     if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
     needs:
