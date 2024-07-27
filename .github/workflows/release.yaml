@@ -16,8 +16,6 @@ jobs:
     environment: ${{ inputs.profile }}
     steps:
       - uses: jlumbroso/free-disk-space@main
-        with:
-          docker-images: true
 
       - uses: actions/checkout@v4
 

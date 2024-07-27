@@ -15,11 +15,14 @@ spring:
     serialization:
       write_dates_as_timestamps: false
 
-
 atto:
   work:
     queue-size: ${ATTO_WORK_QUEUE_SIZE:4}
     device: ${ATTO_WORK_DEVICE:0}
+
+springdoc:
+  swagger-ui:
+    path: /
 
 management:
   server:
