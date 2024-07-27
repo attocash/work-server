@@ -60,5 +60,3 @@ jobs:
             git tag v$NEXT_TAG
             git push origin v$NEXT_TAG
           fi
-        env:
-          TOKEN: ${{ secrets.token }}

@@ -3,16 +3,6 @@ FROM ghcr.io/attocash/work-server:${BASE_IMAGE_TAG}
 
 USER root
 
-RUN apt-get update && apt-get install -y gnupg wget && \
-    wget https://repo.radeon.com/amdgpu-install/6.1.2/ubuntu/jammy/amdgpu-install_6.1.60102-1_all.deb && \
-    apt install -y ./amdgpu-install_6.1.60102-1_all.deb && \
-    amdgpu-install -y --usecase=rocm && \
-    rm amdgpu-*.deb && \
-    apt-get remove -y gnupg wget && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 USER atto
 
 ENV SPRING_PROFILES_ACTIVE=rocm,json
