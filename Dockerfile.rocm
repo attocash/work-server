@@ -15,6 +15,6 @@ RUN apt-get update && apt-get install -y gnupg wget && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-USER atto
+USER app
 
 ENV SPRING_PROFILES_ACTIVE=rocm,json
