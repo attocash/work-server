@@ -1,21 +1,15 @@
-FROM eclipse-temurin:21 as jdk
-
-COPY ./build/libs/work-server.jar /work-server.jar
-
-RUN jar -xvf work-server.jar && jlink --add-modules $(jdeps --recursive --multi-release 21 --ignore-missing-deps --print-module-deps -cp 'BOOT-INF/lib/*' work-server.jar) --output /java
-
 FROM ubuntu:22.04
 
-LABEL org.opencontainers.image.source https://github.com/attocash/work-server
+RUN apt update && apt install ocl-icd-libopencl1
 
-ENV JAVA_HOME=/java
-ENV PATH "${JAVA_HOME}/bin:${PATH}"
+COPY ./build/native/nativeCompile/work-server /app/work-server
 
-RUN useradd -m -s /bin/bash atto
-USER atto
+WORKDIR /app
 
-COPY ./build/libs/work-server.jar /home/atto/work-server.jar
+RUN groupadd -r app && useradd -r -g app app
+USER app
 
-COPY --from=jdk /java /java
+EXPOSE 8080
+EXPOSE 8081
 
-ENTRYPOINT ["java","-XX:+UseZGC","-jar","/home/atto/work-server.jar"]
+ENTRYPOINT ["./work-server"]

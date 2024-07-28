@@ -8,6 +8,7 @@ plugins {
 
     id("org.springframework.boot") version "3.3.1"
     id("io.spring.dependency-management") version "1.1.5"
+    id("org.graalvm.buildtools.native") version "0.10.2"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
 }
 
@@ -79,4 +80,15 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+graalvmNative {
+    binaries {
+        named("main") {
+            buildArgs.add("--static")
+            buildArgs.add("--libc=musl")
+            buildArgs.add("--gc=G1")
+            buildArgs.add("--strict-image-heap")
+        }
+    }
 }
