@@ -49,8 +49,7 @@ jobs:
       - release-tag
     uses: ./.github/workflows/release.yaml
     with:
-      base-image: rocm
-      new-image: rocm
+      image: rocm
       next-tag: ${{ needs.release-tag.outputs.next-tag }}
   release-cuda:
     permissions:
@@ -59,6 +58,5 @@ jobs:
       - release-tag
     uses: ./.github/workflows/release.yaml
     with:
-      base-image: cuda
-      new-image: cuda
+      image: cuda
       next-tag: ${{ needs.release-tag.outputs.next-tag }}
