@@ -38,7 +38,7 @@ jobs:
       profile: rocm
   release-rocm:
     permissions:
-      contents: write
+      packages: write
     if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
     needs:
       - release-tag
