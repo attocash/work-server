@@ -8,7 +8,7 @@ on:
         type: string
     outputs:
       next-tag:
-        value: ${{ jobs.release.next-tag }}
+        value: ${{ jobs.release.outputs.next-tag }}
 
 jobs:
   release:
