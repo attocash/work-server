@@ -6,6 +6,9 @@ on:
       profile:
         required: true
         type: string
+    outputs:
+      next-tag:
+        value: ${{ jobs.release.next-tag }}
 
 jobs:
   release:
