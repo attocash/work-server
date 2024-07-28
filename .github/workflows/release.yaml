@@ -34,6 +34,8 @@ jobs:
           MAJOR_VERSION=$(echo "${{ inputs.next-tag }}" | awk -F. '{print $1}')
           MINOR_VERSION=$(echo "${{ inputs.next-tag }}" | awk -F. '{print $2}')
 
+          echo TAG=${{ inputs.next-tag }} MAJOR_VERSION=${MAJOR_VERSION} MINOR_VERSION=${MINOR_VERSION}
+
           docker tag ghcr.io/${{ github.repository }}:${{ github.sha }}-${{ inputs.image }} ghcr.io/${{ github.repository }}:${{ inputs.next-tag }}-${{ inputs.image }}
           docker tag ghcr.io/${{ github.repository }}:${{ github.sha }}-${{ inputs.image }} ghcr.io/${{ github.repository }}:${MAJOR_VERSION}-${{ inputs.image }}
 
