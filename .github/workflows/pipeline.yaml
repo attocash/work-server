@@ -21,7 +21,6 @@ jobs:
   build-rocm:
     permissions:
       packages: write
-    if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
     needs:
       - build
     uses: ./.github/workflows/build-image.yaml
@@ -30,7 +29,6 @@ jobs:
   build-cuda:
     permissions:
       packages: write
-    if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
     needs:
       - build
     uses: ./.github/workflows/build-image.yaml
@@ -49,7 +47,6 @@ jobs:
   release-rocm:
     permissions:
       packages: write
-    if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
     needs:
       - release-tag
     uses: ./.github/workflows/release.yaml
@@ -59,7 +56,6 @@ jobs:
   release-cuda:
     permissions:
       packages: write
-    if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
     needs:
       - release-tag
     uses: ./.github/workflows/release.yaml
