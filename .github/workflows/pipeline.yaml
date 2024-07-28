@@ -18,14 +18,51 @@ jobs:
     needs:
       - test
     uses: ./.github/workflows/build.yaml
-  release:
+  build-rocm:
     permissions:
-      contents: write
       packages: write
     if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
     needs:
       - build
-    uses: ./.github/workflows/release.yaml
+    uses: ./.github/workflows/build-image.yaml
+    with:
+      image: rocm
+  build-cuda:
+    permissions:
+      packages: write
+    if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
+    needs:
+      - build
+    uses: ./.github/workflows/build-image.yaml
+    with:
+      image: cuda
+  release-tag:
+    permissions:
+      contents: write
+    if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
+    needs:
+      - build-rocm
+      - build-cuda
+    uses: ./.github/workflows/release-tag.yaml
     with:
       profile: rocm
-      bump-version: true
+  release-rocm:
+    permissions:
+      packages: write
+    if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
+    needs:
+      - release-tag
+    uses: ./.github/workflows/release.yaml
+    with:
+      image: rocm
+      next-tag: ${{ needs.release-tag.outputs.next-tag }}
+  release-cuda:
+    permissions:
+      packages: write
+    if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
+    needs:
+      - release-tag
+    uses: ./.github/workflows/release.yaml
+    with:
+      image: rocm
+      next-tag: ${{ needs.release-tag.outputs.next-tag }}
