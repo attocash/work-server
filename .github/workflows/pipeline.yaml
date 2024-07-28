@@ -41,7 +41,7 @@ jobs:
       contents: write
     if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
     needs:
-      - release
+      - release-tag
     uses: ./.github/workflows/release.yaml
     with:
       image: rocm
