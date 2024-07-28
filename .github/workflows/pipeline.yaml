@@ -1,7 +1,6 @@
 name: Pipeline
 
 on:
-  workflow_call:
   push:
     branches:
       - 'release/[0-9]+.x'
@@ -14,7 +13,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    if: "startsWith(github.ref, 'refs/heads/')"
     needs:
       - test
     uses: ./.github/workflows/build.yaml
