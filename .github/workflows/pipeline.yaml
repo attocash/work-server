@@ -41,7 +41,7 @@ jobs:
       - build-cuda
     uses: ./.github/workflows/release-tag.yaml
     with:
-      profile: rocm
+      profile: release
   release-rocm:
     permissions:
       packages: write
