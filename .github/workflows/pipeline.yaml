@@ -32,7 +32,7 @@ jobs:
       contents: write
     if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
     needs:
-      - build
+      - build-rocm
     uses: ./.github/workflows/next-tag.yaml
     with:
       profile: rocm
@@ -41,7 +41,7 @@ jobs:
       contents: write
     if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
     needs:
-      - build
+      - release
     uses: ./.github/workflows/release.yaml
     with:
       image: rocm
