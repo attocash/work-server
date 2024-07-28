@@ -11,8 +11,8 @@ LABEL org.opencontainers.image.source https://github.com/attocash/work-server
 ENV JAVA_HOME=/java
 ENV PATH "${JAVA_HOME}/bin:${PATH}"
 
-RUN useradd -m -s /bin/bash atto
-USER atto
+RUN useradd -m -s /bin/bash app
+USER app
 
 COPY ./build/libs/work-server.jar /home/atto/work-server.jar
 

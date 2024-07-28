@@ -3,17 +3,17 @@
 on:
   workflow_call:
     inputs:
-      profile:
+      image:
         required: true
         type: string
-      bump-version:
-        default: false
-        type: boolean
+      next-tag:
+        required: true
+        type: string
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.profile }}
+    environment: ${{ inputs.image }}
     steps:
       - uses: actions/checkout@v4
 
@@ -29,32 +29,22 @@ jobs:
 
       - name: release
         run: |
-          RELEASE_BRANCH=$(echo "${{ github.ref_name }}" | sed 's/release\///')
-          MAJOR_VERSION=$(echo "$RELEASE_BRANCH" | awk -F. '{print $1}')
-          LATEST_TAG=$(git tag --list "v$MAJOR_VERSION.*" --sort=-v:refname | head -n1)
+          docker pull ghcr.io/${{ github.repository }}:${{ github.sha }}-${{ inputs.image }}
 
-          if [ -z "$LATEST_TAG" ]; then
-            MINOR=0
-          elif [ "${{ inputs.bump-version }}" == "true" ]; then
-            MINOR=$(( ${LATEST_TAG##*.} + 1 ))
-          else
-            MINOR=${LATEST_TAG##*.}
-          fi
+          MAJOR_VERSION=$(echo "${{ inputs.next-tag }}" | awk -F. '{print $1}')
+          MINOR_VERSION=$(echo "${{ inputs.next-tag }}" | awk -F. '{print $2}')
 
-          NEXT_TAG="$MAJOR_VERSION.$MINOR"
+          echo TAG=${{ inputs.next-tag }} MAJOR_VERSION=${MAJOR_VERSION} MINOR_VERSION=${MINOR_VERSION}
 
-          docker build --build-arg BASE_IMAGE_TAG=${{ github.sha }} -t ghcr.io/${{ github.repository }}:${NEXT_TAG}-${{ inputs.profile }} -f Dockerfile.${{ inputs.profile }} .
-          docker tag ghcr.io/${{ github.repository }}:${NEXT_TAG}-${{ inputs.profile }} ghcr.io/${{ github.repository }}:${MAJOR_VERSION}-${{ inputs.profile }}
-          docker push ghcr.io/${{ github.repository }}:${NEXT_TAG}-${{ inputs.profile }}
-          docker push ghcr.io/${{ github.repository }}:${MAJOR_VERSION}-${{ inputs.profile }}
+          docker tag ghcr.io/${{ github.repository }}:${{ github.sha }}-${{ inputs.image }} ghcr.io/${{ github.repository }}:${{ inputs.next-tag }}-${{ inputs.image }}
+          docker tag ghcr.io/${{ github.repository }}:${{ github.sha }}-${{ inputs.image }} ghcr.io/${{ github.repository }}:${MAJOR_VERSION}-${{ inputs.image }}
+
+          docker push ghcr.io/${{ github.repository }}:${{ inputs.next-tag }}-${{ inputs.image }}
+          docker push ghcr.io/${{ github.repository }}:${MAJOR_VERSION}-${{ inputs.image }}
 
           HIGHER_MAJOR_EXISTS=$(git tag --list 'v*' --sort=-v:refname | awk -F. '{print $1}' | sed 's/v//' | uniq | awk -v curr="$MAJOR_VERSION" '$1>curr {print "yes"; exit}')
-          if [ "$HIGHER_MAJOR_EXISTS" != "yes" ]; then
-            docker tag ghcr.io/${{ github.repository }}:${NEXT_TAG}-${{ inputs.profile }} ghcr.io/${{ github.repository }}:${{ inputs.profile }}
-            docker push ghcr.io/${{ github.repository }}:${{ inputs.profile }}
-          fi
 
-          if [ "${{ inputs.bump-version }}" == "true" ]; then
-            git tag v$NEXT_TAG
-            git push origin v$NEXT_TAG
+          if [ "$HIGHER_MAJOR_EXISTS" != "yes" ]; then
+            docker tag ghcr.io/${{ github.repository }}:${{ inputs.next-tag }}-${{ inputs.image }} ghcr.io/${{ github.repository }}:${{ inputs.image }}
+            docker push ghcr.io/${{ github.repository }}:${{ inputs.image }}
           fi
