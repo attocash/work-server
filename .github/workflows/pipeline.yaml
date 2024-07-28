@@ -27,13 +27,13 @@ jobs:
     uses: ./.github/workflows/build-image.yaml
     with:
       image: rocm
-  release:
+  release-tag:
     permissions:
       contents: write
     if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
     needs:
       - build-rocm
-    uses: ./.github/workflows/next-tag.yaml
+    uses: ./.github/workflows/release-tag.yaml
     with:
       profile: rocm
   release-rocm:
