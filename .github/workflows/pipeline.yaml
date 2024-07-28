@@ -64,5 +64,5 @@ jobs:
       - release-tag
     uses: ./.github/workflows/release.yaml
     with:
-      image: rocm
+      image: cuda
       next-tag: ${{ needs.release-tag.outputs.next-tag }}
