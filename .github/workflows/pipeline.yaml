@@ -45,4 +45,4 @@ jobs:
     uses: ./.github/workflows/release.yaml
     with:
       image: rocm
-      next-tag: ${{ needs.release-tag.outputs.next-tag }}
+      next-tag: ${{ needs.release-tag.release.outputs.next-tag }}
