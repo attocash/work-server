@@ -10,8 +10,8 @@ import cash.atto.commons.toAttoVersion
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
+import io.github.oshai.kotlinlogging.KotlinLogging
 import junit.framework.TestCase.assertTrue
-import mu.KotlinLogging
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlux

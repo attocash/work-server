@@ -16,6 +16,14 @@ jobs:
     needs:
       - test
     uses: ./.github/workflows/build.yaml
+  build-cpu:
+    permissions:
+      packages: write
+    needs:
+      - build
+    uses: ./.github/workflows/build-image.yaml
+    with:
+      image: cpu
   build-rocm:
     permissions:
       packages: write
@@ -37,11 +45,21 @@ jobs:
       contents: write
     if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
     needs:
+      - build-cpu
       - build-rocm
       - build-cuda
     uses: ./.github/workflows/release-tag.yaml
     with:
       profile: release
+  release-cpu:
+    permissions:
+      packages: write
+    needs:
+      - release-tag
+    uses: ./.github/workflows/release.yaml
+    with:
+      image: cpu
+      next-tag: ${{ needs.release-tag.outputs.next-tag }}
   release-rocm:
     permissions:
       packages: write
