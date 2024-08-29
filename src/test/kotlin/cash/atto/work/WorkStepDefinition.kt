@@ -41,7 +41,8 @@ class WorkStepDefinition(
                 timestamp = day.getInstant(),
                 sendHashAlgorithm = AttoAlgorithm.V1,
                 sendHash = AttoHash(ByteArray(32)),
-                representative = publicKey,
+                representativeAlgorithm = AttoAlgorithm.V1,
+                representativePublicKey = publicKey,
             )
         PropertyHolder.add(shortKey, block)
     }
