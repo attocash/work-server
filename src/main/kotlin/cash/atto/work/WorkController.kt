@@ -8,7 +8,6 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 class WorkController(
     private val calculator: Worker,
 ) {
-    @PostMapping("/works", produces = [MediaType.APPLICATION_NDJSON_VALUE])
+    @PostMapping("/works")
     @Operation(description = "Generate work")
     suspend fun generate(
         @RequestBody request: WorkRequest,
