@@ -6,7 +6,7 @@ plugins {
     kotlin("plugin.spring") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
-    id("org.springframework.boot") version "3.3.4"
+    id("org.springframework.boot") version "3.3.3"
     id("io.spring.dependency-management") version "1.1.6"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
 }
@@ -29,8 +29,8 @@ configurations {
 }
 
 dependencies {
-    val commonsVersion = "2.19.2"
-    val cucumberVersion = "7.19.0"
+    val commonsVersion = "2.18.1"
+    val cucumberVersion = "7.18.1"
 
     implementation("cash.atto:commons:$commonsVersion")
     implementation("cash.atto:commons:$commonsVersion") {
@@ -44,7 +44,7 @@ dependencies {
         }
     }
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
     implementation("org.springframework.boot:spring-boot-starter-webflux")
