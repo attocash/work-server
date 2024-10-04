@@ -8,7 +8,7 @@ USER root
 RUN apt-get update && apt-get install -y gnupg wget && \
     wget https://repo.radeon.com/amdgpu-install/6.1.2/ubuntu/jammy/amdgpu-install_6.1.60102-1_all.deb && \
     apt install -y ./amdgpu-install_6.1.60102-1_all.deb && \
-    amdgpu-install -y --usecase=opencl && \
+    amdgpu-install --no-dkms -y --usecase=opencl && \
     rm amdgpu-*.deb && \
     apt-get remove -y gnupg wget && \
     apt-get autoremove -y && \
