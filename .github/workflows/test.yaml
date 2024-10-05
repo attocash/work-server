@@ -21,6 +21,6 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - uses: gradle/gradle-build-action@v3
+      - uses: gradle/actions/setup-gradle@v4
 
       - run: ./gradlew test --no-daemon --info --fail-fast
