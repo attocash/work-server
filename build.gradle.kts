@@ -69,7 +69,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers")
 
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
-    implementation("io.github.oshai:kotlin-logging:7.0.3")
+    implementation("io.github.oshai:kotlin-logging:7.0.4")
 }
 
 tasks.withType<KotlinCompile> {
