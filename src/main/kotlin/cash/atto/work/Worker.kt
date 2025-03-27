@@ -2,8 +2,8 @@ package cash.atto.work
 
 import cash.atto.commons.AttoNetwork
 import cash.atto.commons.AttoWork
-import cash.atto.commons.AttoWorker
 import cash.atto.commons.toHex
+import cash.atto.commons.worker.AttoWorker
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking

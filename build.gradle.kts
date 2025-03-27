@@ -29,20 +29,10 @@ configurations {
 }
 
 dependencies {
-    val commonsVersion = "2.20.0"
+    val commonsVersion = "3.3.0"
     val cucumberVersion = "7.21.1"
 
-    implementation("cash.atto:commons:$commonsVersion")
-    implementation("cash.atto:commons:$commonsVersion") {
-        capabilities {
-            requireCapability("cash.atto:commons-json")
-        }
-    }
-    implementation("cash.atto:commons:$commonsVersion") {
-        capabilities {
-            requireCapability("cash.atto:commons-opencl")
-        }
-    }
+    implementation("cash.atto:commons-worker-opencl:$commonsVersion")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")

@@ -1,8 +1,8 @@
 package cash.atto.work
 
-import cash.atto.commons.AttoWorker
-import cash.atto.commons.cpu
-import cash.atto.commons.opencl
+import cash.atto.commons.worker.AttoWorker
+import cash.atto.commons.worker.cpu
+import cash.atto.commons.worker.opencl
 import cash.atto.work.adapter.ApplicationProperties
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
