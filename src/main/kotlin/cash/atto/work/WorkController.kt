@@ -3,6 +3,7 @@ package cash.atto.work
 import cash.atto.commons.AttoNetwork
 import cash.atto.commons.AttoWork
 import cash.atto.commons.fromHexToByteArray
+import cash.atto.commons.serialiazer.InstantMillisSerializer
 import io.swagger.v3.oas.annotations.Operation
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -34,6 +35,7 @@ class WorkController(
 @Serializable
 data class WorkRequest(
     val network: AttoNetwork,
+    @Serializable(with = InstantMillisSerializer::class)
     val timestamp: Instant,
     val target: String,
 )
