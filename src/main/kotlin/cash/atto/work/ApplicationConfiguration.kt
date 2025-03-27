@@ -17,12 +17,11 @@ class ApplicationConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @Profile("!cpu")
-    fun openclWorker(properties: ApplicationProperties): List<AttoWorker> {
-        return (1..properties.queueSize)
+    fun openclWorker(properties: ApplicationProperties): List<AttoWorker> =
+        (1..properties.queueSize)
             .map {
                 AttoWorker.opencl(properties.device.toUByte())
             }
-    }
 
     @Bean
     @ConditionalOnMissingBean

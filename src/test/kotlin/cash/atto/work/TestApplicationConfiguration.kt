@@ -14,8 +14,8 @@ import reactor.netty.transport.logging.AdvancedByteBufFormat
 @Configuration
 class TestApplicationConfiguration {
     @Bean
-    fun exchangeStrategies(): ExchangeStrategies {
-        return ExchangeStrategies
+    fun exchangeStrategies(): ExchangeStrategies =
+        ExchangeStrategies
             .builder()
             .codecs { configurer: ClientCodecConfigurer ->
                 configurer
@@ -23,7 +23,6 @@ class TestApplicationConfiguration {
                 configurer
                     .defaultCodecs()
             }.build()
-    }
 
     @Bean
     fun webClient(exchangeStrategies: ExchangeStrategies): WebClient {
