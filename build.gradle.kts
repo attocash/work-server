@@ -19,14 +19,8 @@ repositories {
     mavenLocal()
 }
 
-configurations {
-    compileOnly {
-        extendsFrom(configurations.annotationProcessor.get())
-    }
-    all {
-        exclude(group = "commons-logging", module = "commons-logging")
-    }
-}
+ext["kotlin-coroutines.version"] = "1.9.0"
+ext["kotlin-serialization.version"] = "1.8.0"
 
 dependencies {
     val commonsVersion = "3.3.1"

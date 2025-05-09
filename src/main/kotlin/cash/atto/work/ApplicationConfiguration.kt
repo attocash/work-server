@@ -26,7 +26,7 @@ class ApplicationConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @Profile("cpu")
-    fun cpuWorker(properties: ApplicationProperties): List<AttoWorker> {
+    fun cpuWorker(): List<AttoWorker> {
         logger.warn { "Using CPU worker. This configuration is only recommended for testing purposes." }
         return listOf(AttoWorker.cpu())
     }
