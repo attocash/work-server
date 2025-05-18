@@ -1,6 +1,6 @@
 spring:
   application:
-    name: work-server
+    name: atto-work-server
   main:
     banner-mode: off
   threads:
