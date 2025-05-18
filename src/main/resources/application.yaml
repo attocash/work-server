@@ -29,4 +29,9 @@ management:
     port: 8081
   endpoints:
     web:
-      base-path: '/'
+      base-path: /
+      exposure:
+        include: health,metrics,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
