@@ -23,7 +23,7 @@ ext["kotlin-coroutines.version"] = "1.9.0"
 ext["kotlin-serialization.version"] = "1.8.0"
 
 dependencies {
-    val commonsVersion = "5.3.0"
+    val commonsVersion = "5.4.0"
     val cucumberVersion = "7.23.0"
 
     implementation("cash.atto:commons-worker-opencl:$commonsVersion")
