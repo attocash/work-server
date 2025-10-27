@@ -52,7 +52,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers")
 
-    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
+    implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("io.github.oshai:kotlin-logging:7.0.13")
 }
 
