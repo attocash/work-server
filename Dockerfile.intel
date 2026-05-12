@@ -1,0 +1,16 @@
+ARG BASE_IMAGE_TAG=latest
+FROM ghcr.io/attocash/work-server:${BASE_IMAGE_TAG}
+
+LABEL org.opencontainers.image.source https://github.com/attocash/work-server
+
+USER root
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends intel-opencl-icd && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+USER app
+
+ENV SPRING_PROFILES_ACTIVE=intel,json

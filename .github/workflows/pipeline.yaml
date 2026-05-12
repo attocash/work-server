@@ -40,6 +40,14 @@ jobs:
     uses: ./.github/workflows/build-image.yaml
     with:
       image: cuda
+  build-intel:
+    permissions:
+      packages: write
+    needs:
+      - build
+    uses: ./.github/workflows/build-image.yaml
+    with:
+      image: intel
   release-tag:
     permissions:
       contents: write
@@ -48,6 +56,7 @@ jobs:
       - build-cpu
       - build-rocm
       - build-cuda
+      - build-intel
     uses: ./.github/workflows/release-tag.yaml
     with:
       profile: release
@@ -77,4 +86,13 @@ jobs:
     uses: ./.github/workflows/release.yaml
     with:
       image: cuda
+      next-tag: ${{ needs.release-tag.outputs.next-tag }}
+  release-intel:
+    permissions:
+      packages: write
+    needs:
+      - release-tag
+    uses: ./.github/workflows/release.yaml
+    with:
+      image: intel
       next-tag: ${{ needs.release-tag.outputs.next-tag }}
