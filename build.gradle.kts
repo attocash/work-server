@@ -12,7 +12,7 @@ group = "cash.atto"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(24)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 repositories {
