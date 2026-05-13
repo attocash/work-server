@@ -16,54 +16,60 @@ jobs:
     needs:
       - test
     uses: ./.github/workflows/build.yaml
-  build-cpu:
-    permissions:
-      packages: write
-    needs:
-      - build
-    uses: ./.github/workflows/build-image.yaml
-    with:
-      image: cpu
-  build-rocm:
-    permissions:
-      packages: write
-    needs:
-      - build
-    uses: ./.github/workflows/build-image.yaml
-    with:
-      image: rocm
-  build-cuda:
-    permissions:
-      packages: write
-    needs:
-      - build
-    uses: ./.github/workflows/build-image.yaml
-    with:
-      image: cuda
-  build-intel:
-    permissions:
-      packages: write
-    needs:
-      - build
-    uses: ./.github/workflows/build-image.yaml
-    with:
-      image: intel
   release-tag:
     permissions:
       contents: write
     if: "startsWith(github.ref, 'refs/heads/release/') && endsWith(github.ref, '.x')"
     needs:
-      - build-cpu
-      - build-rocm
-      - build-cuda
-      - build-intel
+      - build
     uses: ./.github/workflows/release-tag.yaml
     with:
       profile: release
+  build-cpu:
+    permissions:
+      packages: write
+    needs:
+      - build
+      - release-tag
+    uses: ./.github/workflows/build-image.yaml
+    with:
+      image: cpu
+      next-tag: ${{ needs.release-tag.outputs.next-tag }}
+  build-rocm:
+    permissions:
+      packages: write
+    needs:
+      - build
+      - release-tag
+    uses: ./.github/workflows/build-image.yaml
+    with:
+      image: rocm
+      next-tag: ${{ needs.release-tag.outputs.next-tag }}
+  build-cuda:
+    permissions:
+      packages: write
+    needs:
+      - build
+      - release-tag
+    uses: ./.github/workflows/build-image.yaml
+    with:
+      image: cuda
+      next-tag: ${{ needs.release-tag.outputs.next-tag }}
+  build-intel:
+    permissions:
+      packages: write
+    needs:
+      - build
+      - release-tag
+    uses: ./.github/workflows/build-image.yaml
+    with:
+      image: intel
+      next-tag: ${{ needs.release-tag.outputs.next-tag }}
   release-cpu:
     permissions:
       packages: write
     needs:
+      - build-cpu
       - release-tag
     uses: ./.github/workflows/release.yaml
     with:
@@ -73,6 +79,7 @@ jobs:
     permissions:
       packages: write
     needs:
+      - build-rocm
       - release-tag
     uses: ./.github/workflows/release.yaml
     with:
@@ -82,6 +89,7 @@ jobs:
     permissions:
       packages: write
     needs:
+      - build-cuda
       - release-tag
     uses: ./.github/workflows/release.yaml
     with:
@@ -91,6 +99,7 @@ jobs:
     permissions:
       packages: write
     needs:
+      - build-intel
       - release-tag
     uses: ./.github/workflows/release.yaml
     with:
