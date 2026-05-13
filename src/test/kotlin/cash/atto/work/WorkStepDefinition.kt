@@ -6,15 +6,18 @@ import cash.atto.commons.AttoHash
 import cash.atto.commons.AttoNetwork
 import cash.atto.commons.AttoOpenBlock
 import cash.atto.commons.AttoPublicKey
+import cash.atto.commons.AttoWork
 import cash.atto.commons.toAttoVersion
+import cash.atto.commons.worker.AttoWorker
+import cash.atto.commons.worker.remote
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
 import io.github.oshai.kotlinlogging.KotlinLogging
-import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToFlux
 import kotlin.random.Random
 
 class WorkStepDefinition(
@@ -30,7 +33,7 @@ class WorkStepDefinition(
         day: Day,
         shortKey: String,
     ) {
-        val publicKey = AttoPublicKey(Random.Default.nextBytes(ByteArray(32)))
+        val publicKey = AttoPublicKey(Random.nextBytes(ByteArray(32)))
         val block =
             AttoOpenBlock(
                 network = AttoNetwork.LOCAL,
@@ -50,32 +53,19 @@ class WorkStepDefinition(
     @When("work is requested")
     fun request() {
         val shortKey = PropertyHolder.getActiveKey(AttoOpenBlock::class.java)!!
-        val block = PropertyHolder.get(AttoOpenBlock::class.java, shortKey)
+        val block = PropertyHolder[AttoOpenBlock::class.java, shortKey]
 
-        val request =
-            WorkRequest(
-                block.network,
-                block.timestamp,
-                block.publicKey.toString(),
-            )
+        val worker = AttoWorker.remote("http://localhost:$port")
 
-        val response =
-            webClient
-                .post()
-                .uri("http://localhost:$port/works")
-                .bodyValue(request)
-                .retrieve()
-                .bodyToFlux<WorkResponse>()
-                .doOnError { logger.error(it) { "Failed to send $request" } }
-                .log()
-                .blockFirst()!!
-        PropertyHolder.add(shortKey, response)
+        val work = runBlocking { worker.work(block) }
+
+        PropertyHolder.add(shortKey, work)
     }
 
     @Then("work is generated")
     fun assertGenerated() {
-        val block = PropertyHolder.get(AttoOpenBlock::class.java)
-        val response = PropertyHolder.get(WorkResponse::class.java)
-        assertTrue(response.work.isValid(block))
+        val block = PropertyHolder[AttoOpenBlock::class.java]
+        val work = PropertyHolder[AttoWork::class.java]
+        assertTrue(work.isValid(block))
     }
 }

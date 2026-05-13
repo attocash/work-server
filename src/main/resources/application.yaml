@@ -11,10 +11,6 @@ spring:
       date: iso
       time: iso
       date-time: iso
-  jackson:
-    serialization:
-      write_dates_as_timestamps: false
-
 atto:
   work:
     queue-size: ${ATTO_WORK_QUEUE_SIZE:4}

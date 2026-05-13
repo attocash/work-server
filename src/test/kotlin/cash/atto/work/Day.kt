@@ -1,18 +1,17 @@
 package cash.atto.work
 
+import cash.atto.commons.AttoInstant
 import io.cucumber.java.ParameterType
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlin.time.Duration.Companion.days
 
 enum class Day(
-    private val supplier: () -> Instant,
+    private val supplier: () -> AttoInstant,
 ) {
-    TODAY({ Clock.System.now() }),
-    TOMORROW({ Clock.System.now().plus(24.days) }),
+    TODAY({ AttoInstant.now() }),
+    TOMORROW({ AttoInstant.now().plus(1.days) }),
     ;
 
-    fun getInstant(): Instant = supplier.invoke()
+    fun getInstant(): AttoInstant = supplier.invoke()
 }
 
 class DayParameterType {

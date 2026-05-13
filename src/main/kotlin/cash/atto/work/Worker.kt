@@ -1,15 +1,15 @@
 package cash.atto.work
 
+import cash.atto.commons.AttoInstant
 import cash.atto.commons.AttoNetwork
 import cash.atto.commons.AttoWork
-import cash.atto.commons.toHex
+import cash.atto.commons.AttoWorkTarget
 import cash.atto.commons.worker.AttoWorker
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import org.springframework.stereotype.Component
+import kotlin.time.Clock
 
 @Component
 class Worker(
@@ -26,8 +26,8 @@ class Worker(
 
     suspend fun calculate(
         network: AttoNetwork,
-        timestamp: Instant,
-        target: ByteArray,
+        timestamp: AttoInstant,
+        target: AttoWorkTarget,
     ): AttoWork {
         val start = Clock.System.now()
 
@@ -35,12 +35,12 @@ class Worker(
 
         val worker = pool.receive()
 
-        logger.info { "Worker acquired and started for $timestamp ${target.toHex()} from $network network" }
+        logger.info { "Worker acquired and started for $timestamp $target from $network network" }
 
         try {
             val work = worker.work(network, timestamp, target)
             val duration = Clock.System.now() - start
-            logger.info { "Work for $timestamp ${target.toHex()} from $network network completed, duration: $duration" }
+            logger.info { "Work for $timestamp $target from $network network completed, duration: $duration" }
             return work
         } finally {
             pool.send(worker)
