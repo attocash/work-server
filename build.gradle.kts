@@ -5,7 +5,7 @@ plugins {
     kotlin("plugin.serialization") version kotlinVersion
 
     id("org.springframework.boot") version "4.0.6"
-    id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
+    id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
 }
 
 group = "cash.atto"
