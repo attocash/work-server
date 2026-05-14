@@ -37,7 +37,7 @@ Any non-`cpu` profile uses OpenCL workers.
 
 ### Prerequisites
 
-- **Java 25** (the Gradle toolchain is pinned to 24 in `build.gradle.kts`)
+- **Java 25** (the Gradle toolchain is pinned to 25 in `build.gradle.kts`)
 - A local OpenCL runtime if you want GPU-backed execution outside containers
 - Podman or Docker if you want to run a published image
 

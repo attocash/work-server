@@ -1,8 +1,8 @@
-FROM eclipse-temurin:21 as jdk
+FROM docker.io/library/eclipse-temurin:25 AS jdk
 COPY ./build/libs/work-server.jar /work-server.jar
-RUN jar -xvf work-server.jar && jlink --add-modules $(jdeps --recursive --multi-release 21 --ignore-missing-deps --print-module-deps -cp 'BOOT-INF/lib/*' work-server.jar) --output /java
+RUN jar -xvf work-server.jar && jlink --add-modules $(jdeps --recursive --multi-release 25 --ignore-missing-deps --print-module-deps -cp 'BOOT-INF/lib/*' work-server.jar) --output /java
 
-FROM ubuntu:22.04
+FROM docker.io/library/ubuntu:22.04
 
 ARG APPLICATION_VERSION
 
