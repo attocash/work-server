@@ -52,7 +52,7 @@ dependencies {
     testImplementation("org.awaitility:awaitility:4.3.0")
 
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
-    implementation("io.github.oshai:kotlin-logging:8.0.02")
+    implementation("io.github.oshai:kotlin-logging:8.0.03")
 }
 
 tasks.withType<Test> {
