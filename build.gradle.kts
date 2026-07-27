@@ -22,7 +22,7 @@ repositories {
 
 dependencies {
     val commonsVersion = "7.0.2"
-    val cucumberVersion = "7.34.5"
+    val cucumberVersion = "7.34.6"
 
     implementation("cash.atto:commons-worker-opencl:$commonsVersion")
     implementation("cash.atto:commons-spring-boot-starter:$commonsVersion")
