@@ -27,7 +27,11 @@ jobs:
       profile: release
   build-cpu:
     permissions:
+      contents: read
       packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
     needs:
       - build
       - release-tag
@@ -37,7 +41,11 @@ jobs:
       next-tag: ${{ needs.release-tag.outputs.next-tag }}
   build-rocm:
     permissions:
+      contents: read
       packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
     needs:
       - build
       - release-tag
@@ -47,7 +55,11 @@ jobs:
       next-tag: ${{ needs.release-tag.outputs.next-tag }}
   build-cuda:
     permissions:
+      contents: read
       packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
     needs:
       - build
       - release-tag
@@ -57,7 +69,11 @@ jobs:
       next-tag: ${{ needs.release-tag.outputs.next-tag }}
   build-intel:
     permissions:
+      contents: read
       packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
     needs:
       - build
       - release-tag
